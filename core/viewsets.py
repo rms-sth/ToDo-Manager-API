@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
+from .mixins import MultipleObjectCreate
 from .models import Category, ToDo
 from .permissions import IsOwnerPermission
 from .serializers import CategorySerializer, ToDoSerializer, UserSerializer
@@ -26,7 +27,7 @@ class UserViewSet(ModelViewSet):
         return User.objects.all().exclude(id=self.request.user.id).order_by("username")
 
 
-class CategoryViewSet(ModelViewSet):
+class CategoryViewSet(MultipleObjectCreate, ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -35,12 +36,13 @@ class CategoryViewSet(ModelViewSet):
     def get_queryset(self):
         return Category.objects.filter(created_by=self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.validated_data["created_by"] = self.request.user
-        return super().perform_create(serializer)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
 
 
-class ToDoViewSet(ModelViewSet):
+class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = ToDo.objects.all()
     serializer_class = ToDoSerializer
@@ -48,7 +50,3 @@ class ToDoViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Category.objects.filter(created_by=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.validated_data["created_by"] = self.request.user
-        return super().perform_create(serializer)

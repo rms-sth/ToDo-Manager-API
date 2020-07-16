@@ -22,8 +22,17 @@ class CategorySerializer(serializers.ModelSerializer):
             "created_by": {"read_only": True},
         }
 
+    def create(self, validated_data):
+        created_by = self.context["request"].user
+        validated_data.update({"created_by": created_by})
+        return super().create(validated_data)
+
 
 class ToDoSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        data["created_by"] = self.context["request"].user
+        return data
+
     class Meta:
         model = ToDo
         fields = ["id", "title", "category", "created_at", "created_by", "deadline"]
