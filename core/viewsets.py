@@ -1,3 +1,54 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 
-# Create your views here.
+from .models import Category, ToDo
+from .permissions import IsOwnerPermission
+from .serializers import CategorySerializer, ToDoSerializer, UserSerializer
+
+User = get_user_model()
+
+
+class UserViewSet(ModelViewSet):
+    permission_classes = [IsAdminUser]
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        if self.action == "list" or self.action == "retrieve":
+            return [
+                IsAuthenticated(),
+            ]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        return User.objects.all().exclude(id=self.request.user.id).order_by("username")
+
+
+class CategoryViewSet(ModelViewSet):
+    permission_classes = [IsAdminUser]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsOwnerPermission,)
+
+    def get_queryset(self):
+        return Category.objects.filter(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.validated_data["created_by"] = self.request.user
+        return super().perform_create(serializer)
+
+
+class ToDoViewSet(ModelViewSet):
+    permission_classes = [IsAdminUser]
+    queryset = ToDo.objects.all()
+    serializer_class = ToDoSerializer
+    permission_classes = (IsOwnerPermission,)
+
+    def get_queryset(self):
+        return Category.objects.filter(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.validated_data["created_by"] = self.request.user
+        return super().perform_create(serializer)
