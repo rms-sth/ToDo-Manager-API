@@ -1,4 +1,16 @@
+appdirs==1.4.4
 asgiref==3.2.10
+attrs==19.3.0
+black==19.10b0
+click==7.1.2
 Django==3.0.8
+django-filter==2.3.0
+djangorestframework==3.11.0
+pathspec==0.8.0
+psycopg2-binary==2.8.5
+python-decouple==3.3
 pytz==2020.1
+regex==2020.7.14
 sqlparse==0.3.1
+toml==0.10.1
+typed-ast==1.4.1
