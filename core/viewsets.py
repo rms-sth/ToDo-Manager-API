@@ -1,15 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from .filters import CategoryFilter, ToDoFilter
 from .mixins import MultipleObjectCreate
 from .models import Category, ToDo
-from .permissions import IsOwnerPermission
-from .serializers import CategorySerializer, ToDoSerializer, UserSerializer
-from django_filters.rest_framework import DjangoFilterBackend
-from .filters import CategoryFilter, ToDoFilter
 from .pagination import BasicPagination
+from .permissions import IsOwnerPermission
+from .serializers import (
+    CategorySerializer,
+    MultipleToDoSerializer,
+    ToDoSerializer,
+    UserSerializer,
+)
 
 User = get_user_model()
 
@@ -31,7 +39,6 @@ class UserViewSet(ModelViewSet):
 
 
 class CategoryViewSet(MultipleObjectCreate, ModelViewSet):
-    permission_classes = [IsAdminUser]
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsOwnerPermission,)
@@ -49,7 +56,6 @@ class CategoryViewSet(MultipleObjectCreate, ModelViewSet):
 
 
 class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
-    permission_classes = [IsAdminUser]
     queryset = ToDo.objects.all()
     serializer_class = ToDoSerializer
     permission_classes = (IsOwnerPermission,)
@@ -59,3 +65,18 @@ class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
 
     def get_queryset(self):
         return ToDo.objects.filter(created_by=self.request.user)
+
+
+class MultipleToDoDeleteView(APIView):
+    serializer_class = MultipleToDoSerializer
+    permission_classes = (IsOwnerPermission,)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            todo_id = serializer.validated_data["todo_id"]
+            todos = ToDo.objects.filter(id__in=todo_id).delete()
+            return Response(
+                {"success": f"{todos[0]} tasks were deleted."},
+                status=status.HTTP_200_OK,
+            )

@@ -1,3 +1,4 @@
+from os import name
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
@@ -12,7 +13,12 @@ router.register(r"category", viewsets.CategoryViewSet)
 router.register(r"todo", viewsets.ToDoViewSet)
 
 urlpatterns = [
-    path("api/v1/", include(router.urls)),
+    path(
+        "todo/multiple-delete/",
+        viewsets.MultipleToDoDeleteView.as_view(),
+        name="todo_multiple_delete",
+    ),
+    path("", include(router.urls)),
 ]
 
 if settings.DEBUG:

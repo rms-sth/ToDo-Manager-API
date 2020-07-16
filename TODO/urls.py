@@ -30,6 +30,8 @@ urlpatterns = [
         jwt_views.TokenRefreshView.as_view(),
         name="token_refresh",
     ),
-    path("api/token/verify/", jwt_views.TokenVerifyView.as_view(), name="token_verify"),
-    path("", include("core.urls")),
+    path(
+        "api/v1/token/verify/", jwt_views.TokenVerifyView.as_view(), name="token_verify"
+    ),
+    path("api/v1/", include("core.urls")),
 ]

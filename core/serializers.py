@@ -39,3 +39,7 @@ class ToDoSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "created_by": {"read_only": True},
         }
+
+
+class MultipleToDoSerializer(serializers.Serializer):
+    todo_id = serializers.ListField(child=serializers.CharField(), write_only=True)
