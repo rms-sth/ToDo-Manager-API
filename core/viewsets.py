@@ -7,6 +7,8 @@ from .mixins import MultipleObjectCreate
 from .models import Category, ToDo
 from .permissions import IsOwnerPermission
 from .serializers import CategorySerializer, ToDoSerializer, UserSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import CategoryFilter, ToDoFilter
 
 User = get_user_model()
 
@@ -32,6 +34,8 @@ class CategoryViewSet(MultipleObjectCreate, ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsOwnerPermission,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CategoryFilter
 
     def get_queryset(self):
         return Category.objects.filter(created_by=self.request.user)
@@ -47,6 +51,8 @@ class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
     queryset = ToDo.objects.all()
     serializer_class = ToDoSerializer
     permission_classes = (IsOwnerPermission,)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ToDoFilter
 
     def get_queryset(self):
-        return Category.objects.filter(created_by=self.request.user)
+        return ToDo.objects.filter(created_by=self.request.user)
