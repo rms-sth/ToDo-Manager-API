@@ -9,6 +9,7 @@ from .permissions import IsOwnerPermission
 from .serializers import CategorySerializer, ToDoSerializer, UserSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import CategoryFilter, ToDoFilter
+from .pagination import BasicPagination
 
 User = get_user_model()
 
@@ -36,6 +37,7 @@ class CategoryViewSet(MultipleObjectCreate, ModelViewSet):
     permission_classes = (IsOwnerPermission,)
     filter_backends = [DjangoFilterBackend]
     filterset_class = CategoryFilter
+    pagination_class = BasicPagination
 
     def get_queryset(self):
         return Category.objects.filter(created_by=self.request.user)
@@ -53,6 +55,7 @@ class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
     permission_classes = (IsOwnerPermission,)
     filter_backends = [DjangoFilterBackend]
     filterset_class = ToDoFilter
+    pagination_class = BasicPagination
 
     def get_queryset(self):
         return ToDo.objects.filter(created_by=self.request.user)
