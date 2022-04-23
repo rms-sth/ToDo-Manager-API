@@ -56,7 +56,7 @@ class CategoryViewSet(MultipleObjectCreate, ModelViewSet):
 
 
 class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
-    queryset = ToDo.objects.all()
+    queryset = ToDo.objects.all().order_by("created_at")
     serializer_class = ToDoSerializer
     permission_classes = (IsOwnerPermission,)
     filter_backends = [DjangoFilterBackend]
@@ -64,7 +64,7 @@ class ToDoViewSet(MultipleObjectCreate, ModelViewSet):
     pagination_class = BasicPagination
 
     def get_queryset(self):
-        return ToDo.objects.filter(created_by=self.request.user)
+        return self.queryset.filter(created_by=self.request.user)
 
 
 class MultipleToDoDeleteView(APIView):
